@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Recognition</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .video-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #f44336, #da190b);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .status-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .status-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+        }
+
+        .status-value {
+            font-weight: 300;
+        }
+
+        .sign-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sign-text {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            transition: width 0.3s ease;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .settings-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+        }
+
+        .setting-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider {
+            width: 150px;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .help-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .help-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .help-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .help-icon {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .help-text {
+            flex: 1;
+            line-height: 1.6;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-hands"></i> Sign Language Recognition</h1>
+            <p>Real-time sign language recognition with audio output</p>
+        </div>
+
+        <div class="main-content">
+            <div class="video-section">
+                <h3><i class="fas fa-video"></i> Live Camera Feed</h3>
+                <div class="video-container">
+                    <img id="videoFeed" class="video-feed" alt="Camera feed">
+                    <div class="video-overlay" id="videoOverlay">
+                        <i class="fas fa-circle"></i> Live
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="startBtn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Recognition
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>
+                        <i class="fas fa-stop"></i> Stop Recognition
+                    </button>
+                    <button id="speakBtn" class="btn btn-secondary" disabled>
+                        <i class="fas fa-volume-up"></i> Speak Sign
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="status-card">
+                    <h3><i class="fas fa-info-circle"></i> Recognition Status</h3>
+                    <div class="status-item">
+                        <span class="status-label">Current Sign:</span>
+                        <span class="status-value" id="currentSign">No Sign</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Confidence:</span>
+                        <span class="status-value" id="confidence">0.0%</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Status:</span>
+                        <span class="status-value" id="recognitionStatus">Stopped</span>
+                    </div>
+                </div>
+
+                <div class="sign-display">
+                    <div class="sign-text" id="signDisplay">No Sign</div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                    </div>
+                    <div id="confidenceText">Confidence: 0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3><i class="fas fa-cog"></i> Recognition Settings</h3>
+            <div class="setting-item">
+                <span class="setting-label">Confidence Threshold:</span>
+                <div class="setting-control">
+                    <input type="range" id="confidenceSlider" class="slider" min="0.1" max="1.0" step="0.1" value="0.7">
+                    <span class="value-display" id="confidenceValue">0.7</span>
+                </div>
+            </div>
+            <div class="setting-item">
+                <span class="setting-label">Stable Frames:</span>
+                <div class="setting-control">
+                    <input type="range" id="stableFramesSlider" class="slider" min="3" max="10" step="1" value="5">
+                    <span class="value-display" id="stableFramesValue">5</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-section">
+            <h3><i class="fas fa-question-circle"></i> How to Use</h3>
+            <div class="help-item">
+                <i class="fas fa-lightbulb help-icon"></i>
+                <div class="help-text">
+                    <strong>Good Lighting:</strong> Ensure your hands are well-lit and clearly visible to the camera.
+                </div>
+            </div>
+            <div class="help-item">
+                <i class="fas fa-hand-paper help-icon"></i>
+                <div class="help-text">
+                    <strong>Hand Position:</strong> Keep your hands in the center of the camera view, about 1-2 feet away.
+                </div>
+            </div>
+            <div class="help-item">
+                <i class="fas fa-clock help-icon"></i>
+                <div class="help-text">
+                    <strong>Hold Signs:</strong> Hold each sign steady for a few seconds to get accurate recognition.
+                </div>
+            </div>
+            <div class="help-item">
+                <i class="fas fa-volume-up help-icon"></i>
+                <div class="help-text">
+                    <strong>Audio Output:</strong> The system will automatically speak recognized signs. You can also manually trigger speech.
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="footer">
+            <p>&copy; 2024 Sign Language Recognition System. Built with MediaPipe, TensorFlow, and Flask.</p>
+        </div>
+    </div>
+
+    <script>
+        class SignLanguageApp {
+            constructor() {
+                this.isProcessing = false;
+                this.currentSign = 'No Sign';
+                this.confidence = 0.0;
+                this.statusInterval = null;
+                this.videoFeed = document.getElementById('videoFeed');
+                this.initializeElements();
+                this.bindEvents();
+                this.startStatusUpdates();
+            }
+
+            initializeElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.speakBtn = document.getElementById('speakBtn');
+                this.currentSignElement = document.getElementById('currentSign');
+                this.confidenceElement = document.getElementById('confidence');
+                this.recognitionStatusElement = document.getElementById('recognitionStatus');
+                this.signDisplayElement = document.getElementById('signDisplay');
+                this.confidenceFillElement = document.getElementById('confidenceFill');
+                this.confidenceTextElement = document.getElementById('confidenceText');
+                this.confidenceSlider = document.getElementById('confidenceSlider');
+                this.stableFramesSlider = document.getElementById('stableFramesSlider');
+                this.confidenceValue = document.getElementById('confidenceValue');
+                this.stableFramesValue = document.getElementById('stableFramesValue');
+                this.loadingElement = document.getElementById('loading');
+                this.errorMessageElement = document.getElementById('errorMessage');
+                this.successMessageElement = document.getElementById('successMessage');
+            }
+
+            bindEvents() {
+                this.startBtn.addEventListener('click', () => this.startRecognition());
+                this.stopBtn.addEventListener('click', () => this.stopRecognition());
+                this.speakBtn.addEventListener('click', () => this.speakCurrentSign());
+                this.confidenceSlider.addEventListener('input', (e) => this.updateConfidenceThreshold(e.target.value));
+                this.stableFramesSlider.addEventListener('input', (e) => this.updateStableFrames(e.target.value));
+            }
+
+            async startRecognition() {
+                try {
+                    this.showLoading(true);
+                    this.showMessage('', 'success');
+                    this.showMessage('', 'error');
+
+                    const response = await fetch('/api/start', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.isProcessing = true;
+                        this.updateUI();
+                        this.showMessage(data.message, 'success');
+                        this.startVideoFeed();
+                    } else {
+                        this.showMessage(data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('Failed to start recognition: ' + error.message, 'error');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async stopRecognition() {
+                try {
+                    const response = await fetch('/api/stop', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.isProcessing = false;
+                        this.updateUI();
+                        this.showMessage(data.message, 'success');
+                        this.stopVideoFeed();
+                    } else {
+                        this.showMessage(data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('Failed to stop recognition: ' + error.message, 'error');
+                }
+            }
+
+            async speakCurrentSign() {
+                if (this.currentSign === 'No Sign') {
+                    this.showMessage('No sign to speak', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/speak', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ sign: this.currentSign })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.showMessage(data.message, 'success');
+                    } else {
+                        this.showMessage(data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('Failed to speak sign: ' + error.message, 'error');
+                }
+            }
+
+            startVideoFeed() {
+                this.videoFeed.src = '/video_feed';
+                this.videoFeed.style.display = 'block';
+            }
+
+            stopVideoFeed() {
+                this.videoFeed.style.display = 'none';
+                this.videoFeed.src = '';
+            }
+
+            async updateStatus() {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+
+                    this.currentSign = data.sign;
+                    this.confidence = data.confidence;
+                    this.isProcessing = data.is_processing;
+
+                    this.updateUI();
+                } catch (error) {
+                    console.error('Failed to update status:', error);
+                }
+            }
+
+            updateUI() {
+                // Update buttons
+                this.startBtn.disabled = this.isProcessing;
+                this.stopBtn.disabled = !this.isProcessing;
+                this.speakBtn.disabled = !this.isProcessing || this.currentSign === 'No Sign';
+
+                // Update status
+                this.currentSignElement.textContent = this.currentSign;
+                this.confidenceElement.textContent = `${(this.confidence * 100).toFixed(1)}%`;
+                this.recognitionStatusElement.textContent = this.isProcessing ? 'Running' : 'Stopped';
+
+                // Update sign display
+                this.signDisplayElement.textContent = this.currentSign;
+
+                // Update confidence bar
+                const confidencePercent = this.confidence * 100;
+                this.confidenceFillElement.style.width = `${confidencePercent}%`;
+                this.confidenceTextElement.textContent = `Confidence: ${confidencePercent.toFixed(1)}%`;
+
+                // Update video overlay
+                const overlay = document.getElementById('videoOverlay');
+                if (this.isProcessing) {
+                    overlay.innerHTML = '<i class="fas fa-circle" style="color: #4CAF50;"></i> Live';
+                } else {
+                    overlay.innerHTML = '<i class="fas fa-circle" style="color: #f44336;"></i> Stopped';
+                }
+            }
+
+            async updateConfidenceThreshold(value) {
+                this.confidenceValue.textContent = value;
+                
+                try {
+                    await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ confidence_threshold: parseFloat(value) })
+                    });
+                } catch (error) {
+                    console.error('Failed to update confidence threshold:', error);
+                }
+            }
+
+            async updateStableFrames(value) {
+                this.stableFramesValue.textContent = value;
+                
+                try {
+                    await fetch('/api/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ stable_frames_threshold: parseInt(value) })
+                    });
+                } catch (error) {
+                    console.error('Failed to update stable frames:', error);
+                }
+            }
+
+            startStatusUpdates() {
+                this.statusInterval = setInterval(() => {
+                    if (this.isProcessing) {
+                        this.updateStatus();
+                    }
+                }, 1000);
+            }
+
+            showLoading(show) {
+                this.loadingElement.style.display = show ? 'block' : 'none';
+            }
+
+            showMessage(message, type) {
+                const element = type === 'success' ? this.successMessageElement : this.errorMessageElement;
+                
+                if (message) {
+                    element.textContent = message;
+                    element.style.display = 'block';
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        element.style.display = 'none';
+                    }, 5000);
+                } else {
+                    element.style.display = 'none';
+                }
+            }
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SignLanguageApp();
+        });
+    </script>
+</body>
+</html>
