@@ -5,7 +5,7 @@ This project provides real-time sign language recognition using computer vision 
 ## 🌐 Live Dashboard
 Access the deployed SignSpeak dashboard here:
 
-🔗 https://your-dashboard-link.com
+🔗 [https://your-dashboard-link.com](https://signspeak-voice-vue.lovable.app/)
 
 ## Features
 
