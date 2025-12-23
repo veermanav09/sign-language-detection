@@ -2,6 +2,11 @@
 
 This project provides real-time sign language recognition using computer vision and machine learning, with audio feedback for recognized signs.
 
+## 🌐 Live Dashboard
+Access the deployed SignSpeak dashboard here:
+
+🔗 https://your-dashboard-link.com
+
 ## Features
 
 - **Real-time hand tracking** using MediaPipe
